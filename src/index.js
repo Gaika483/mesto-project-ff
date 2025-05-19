@@ -6,57 +6,87 @@ import { initialCards } from './scripts/cards.js';
 // Инициализация модальных окон
 initModal();
 
-// ===== Редактирование профиля =====
-const editPopup = document.querySelector('.popup_type_edit');
-const formElement = editPopup.querySelector('.popup__form');
-const nameInput = formElement.querySelector('.popup__input_type_name');
-const jobInput = formElement.querySelector('.popup__input_type_description');
+// ===== DOM элементы =====
+const editProfilePopup = document.querySelector('.popup_type_edit');
+const editProfileForm = editProfilePopup.querySelector('.popup__form');
+const nameInput = editProfileForm.querySelector('.popup__input_type_name');
+const jobInput = editProfileForm.querySelector('.popup__input_type_description');
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
 const editButton = document.querySelector('.profile__edit-button');
 
-editButton.addEventListener('click', () => {
-  nameInput.value = profileTitle.textContent;
-  jobInput.value = profileDescription.textContent;
-  openPopup(editPopup);
-});
-
-formElement.addEventListener('submit', (evt) => {
-  evt.preventDefault();
-  profileTitle.textContent = nameInput.value;
-  profileDescription.textContent = jobInput.value;
-  closePopup(editPopup);
-});
-
-// ===== Добавление карточек =====
 const newCardPopup = document.querySelector('.popup_type_new-card');
-const cardForm = newCardPopup.querySelector('.popup__form');
-const cardNameInput = cardForm.querySelector('.popup__input_type_card-name');
-const cardLinkInput = cardForm.querySelector('.popup__input_type_url');
+const newCardForm = newCardPopup.querySelector('.popup__form');
+const cardNameInput = newCardForm.querySelector('.popup__input_type_card-name');
+const cardLinkInput = newCardForm.querySelector('.popup__input_type_url');
 const placesList = document.querySelector('.places__list');
 const addButton = document.querySelector('.profile__add-button');
 
+const imagePopup = document.querySelector('.popup_type_image');
+const cardTemplate = document.querySelector('#card-template').content;
+
+// ===== Редактирование профиля =====
+editButton.addEventListener('click', () => {
+  nameInput.value = profileTitle.textContent;
+  jobInput.value = profileDescription.textContent;
+  openPopup(editProfilePopup);
+});
+
+editProfileForm.addEventListener('submit', (evt) => {
+  evt.preventDefault();
+  profileTitle.textContent = nameInput.value;
+  profileDescription.textContent = jobInput.value;
+  closePopup(editProfilePopup);
+});
+
+// ===== Добавление карточек =====
 addButton.addEventListener('click', () => {
-  cardForm.reset();
+  newCardForm.reset();
   openPopup(newCardPopup);
 });
 
-cardForm.addEventListener('submit', (evt) => {
+newCardForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
   
   addCard(
     { name: cardNameInput.value, link: cardLinkInput.value },
     placesList,
-    true // Добавляем в начало
+    handleLikeClick,
+    handleDeleteCard,
+    handleImageClick,
+    cardTemplate,
+    true
   );
   
   closePopup(newCardPopup);
-  cardForm.reset();
 });
 
-// ===== Рендер начальных карточек =====
-if (window.initialCards) {
-  window.initialCards.forEach(cardData => {
-    addCard(cardData, placesList);
-  });
+// ===== Функции для карточек =====
+function handleDeleteCard(evt) {
+  const cardElement = evt.target.closest('.card');
+  if (cardElement) {
+    cardElement.remove();
+  }
 }
+
+function handleImageClick(cardData) {
+  const imagePopupImg = imagePopup.querySelector('.popup__image');
+  const imagePopupCaption = imagePopup.querySelector('.popup__caption');
+  
+  imagePopupImg.src = cardData.link;
+  imagePopupImg.alt = cardData.name;
+  imagePopupCaption.textContent = cardData.name;
+  openPopup(imagePopup);
+}
+
+// ===== Рендер начальных карточек =====
+initialCards.forEach(cardData => {
+  addCard(
+    cardData,
+    placesList,
+    handleLikeClick,
+    handleDeleteCard,
+    handleImageClick,
+    cardTemplate
+  );
+});
