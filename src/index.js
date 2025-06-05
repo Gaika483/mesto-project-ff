@@ -120,8 +120,8 @@ function handleAddCardSubmit(evt) {
     .then((card) => {
       const newCard = createCard(
         card._id,
-        cardName,
-        imageUrl,
+        card.name,
+        card.link, 
         deleteCard,
         card.likes,
         setLikeToCard,
